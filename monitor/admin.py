@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import APIEndpoint, HealthLog
 
-# Register your models here.
+admin.site.register(APIEndpoint)
+admin.site.register(HealthLog)
