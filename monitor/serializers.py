@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import HealthLog
+from .models import HealthLog, APIEndpoint
 
 class HealthLogSerializer(serializers.ModelSerializer):
     api_name = serializers.CharField(source = "api.name")
@@ -14,3 +14,17 @@ class HealthLogSerializer(serializers.ModelSerializer):
             "success",
             "checked_at"
         ]
+
+
+class APIEndpointSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = APIEndpoint
+        fields = [
+            "id",
+            "name",
+            "url",
+            "method",
+            "is_active",
+            "created_at",
+        ]
+
