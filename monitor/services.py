@@ -15,7 +15,7 @@ def check_all_apis():
         start_time = time.time()
         
         try:
-            response = requests.get(api.url, timeout=5)
+            response = requests.request(api.method, api.url, timeout=5)
             latency =  time.time() - start_time
             status_code = response.status_code
             success = status_code == 200
@@ -39,10 +39,15 @@ def check_all_apis():
         recent_logs = HealthLog.objects.filter(api=api).order_by("-checked_at")[:3]
 
         if len(recent_logs) == 3 and all(not log.success for log in recent_logs):
-            print("3 consecutive failures detected")
-            send_alert_email(api.name)
+            if not api.alert_sent:
+                send_alert_email(api.name, api.user.email)
+                api.alert_sent = True
+                api.save()
             
-            
+        if success and api.alert_sent:
+            api.alert_sent = False
+            api.save()
+        
         
 
 def delete_old_logs():
@@ -52,7 +57,7 @@ def delete_old_logs():
     print(f"Deleted {deleted_count} old logs.")
 
 
-def send_alert_email(api_name):
+def send_alert_email(api_name, user_email):
     subject = f"API ALERT: {api_name} is DOWN."
     message = f"The API '{api_name}' has failed multiple health checks. Please investigate."
 
@@ -60,6 +65,6 @@ def send_alert_email(api_name):
         subject,
         message,
         settings.EMAIL_HOST_USER,
-        [settings.EMAIL_HOST_USER],
+        [user_email],
         fail_silently= False,
     )

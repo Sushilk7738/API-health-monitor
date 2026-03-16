@@ -1,23 +1,26 @@
 import requests
 import time 
 from django.shortcuts import render
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from .models import APIEndpoint, HealthLog
 from .serializers import HealthLogSerializer, APIEndpointSerializer
 from rest_framework import generics
 from django.db.models import Avg
 from django.utils import timezone
+from django.shortcuts import get_object_or_404
 from datetime import timedelta
+from rest_framework.permissions import IsAuthenticated
 
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def health_check(request, api_id):
-    api = APIEndpoint.objects.get(id = api_id)
+    api = get_object_or_404(APIEndpoint, id = api_id, user =request.user)
     start = time.time()
     try:
-        response = requests.get(api.url)
+        response = requests.request(api.method, api.url, timeout=5)
         status = response.status_code
         success = status ==200
     
@@ -42,10 +45,11 @@ def health_check(request, api_id):
 
 
 class HealthLogListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = HealthLogSerializer
 
     def get_queryset(self):
-        queryset = HealthLog.objects.all().order_by('-checked_at')
+        queryset = HealthLog.objects.filter(api__user= self.request.user).order_by('-checked_at')
 
         success = self.request.query_params.get('success')
         status = self.request.query_params.get('status')
@@ -64,8 +68,9 @@ class HealthLogListView(generics.ListAPIView):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def api_stats(request, api_id):
-    logs = HealthLog.objects.filter(api_id = api_id)
+    logs = HealthLog.objects.filter(api_id = api_id, api__user = request.user)
     
     hours = request.query_params.get('hours')
     days = request.query_params.get('days')
@@ -97,15 +102,55 @@ def api_stats(request, api_id):
 
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_status(request):
+    apis = APIEndpoint.objects.filter(user = request.user)
+
+    data = []
+
+    for api in apis:
+        last_log = HealthLog.objects.filter(api = api).order_by("-checked_at").first()
+
+        if last_log:
+            status = "UP" if last_log.success else "DOWN"
+        else:
+            status = "UNKNOWN"
+
+        data.append({
+            "api_name": api.name,
+            "url" : api.url,
+            "status" : status,
+            "last_checked" : last_log.checked_at if last_log else None
+        })
+
+    return Response(data)
+
+
+
+
+
+
+
+
 #* API LIST view
 
 class APIEndpointListView(generics.ListAPIView):
-    queryset = APIEndpoint.objects.all()
+    permission_classes = [IsAuthenticated]
     serializer_class = APIEndpointSerializer
+
+    def get_queryset(self):
+        return APIEndpoint.objects.filter(user = self.request.user)
     
     
 #* API create/add view
 
 class APIEndpointCreateView(generics.CreateAPIView):
-    queryset = APIEndpoint.objects.all()
+    permission_classes = [IsAuthenticated]
     serializer_class = APIEndpointSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+
