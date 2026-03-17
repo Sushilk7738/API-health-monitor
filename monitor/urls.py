@@ -20,4 +20,7 @@ urlpatterns = [
     
     #* status of apis
     path('status', views.api_status, name='api_status'),
+
+    #* to fetch single api of user
+    path('apis/<int:pk>', views.APIEndpointDetailView.as_view(), name='api_detail'),
 ]   

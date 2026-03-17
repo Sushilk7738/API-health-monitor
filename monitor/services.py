@@ -45,6 +45,7 @@ def check_all_apis():
                 api.save()
             
         if success and api.alert_sent:
+            send_recovery_email(api.name, api.user.email)
             api.alert_sent = False
             api.save()
         
@@ -67,4 +68,17 @@ def send_alert_email(api_name, user_email):
         settings.EMAIL_HOST_USER,
         [user_email],
         fail_silently= False,
+    )
+    
+
+def send_recovery_email(api_name, user_email):
+    subject = f"API Recovered: {api_name} is UP."
+    message = f"The API '{api_name}' is back to normal operation."
+
+    send_mail(
+        subject,
+        message,
+        settings.EMAIL_HOST_USER,
+        [user_email],
+        fail_silently=False,
     )

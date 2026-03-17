@@ -153,4 +153,9 @@ class APIEndpointCreateView(generics.CreateAPIView):
         serializer.save(user=self.request.user)
 
 
+class APIEndpointDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = APIEndpointSerializer
 
+    def get_queryset(self):
+        return APIEndpoint.objects.filter(user = self.request.user)
