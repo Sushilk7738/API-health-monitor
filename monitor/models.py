@@ -9,6 +9,7 @@ class APIEndpoint(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     alert_sent = models.BooleanField(default=False)
+    latency_threshold = models.FloatField(default=2.0)
     
     class Meta:
         verbose_name_plural = "api_end_point"

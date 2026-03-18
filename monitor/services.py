@@ -5,26 +5,44 @@ from django.utils import timezone
 from datetime import timedelta
 import requests
 import time
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 
 
 def check_all_apis():
     apis = APIEndpoint.objects.filter(is_active = True)
 
     for api in apis:
-        # print(f"Checking API: {api.name}")
-        start_time = time.time()
+        logger.info(f"Checking API: {api.name}")
         
-        try:
-            response = requests.request(api.method, api.url, timeout=5)
-            latency =  time.time() - start_time
-            status_code = response.status_code
-            success = status_code == 200
+        start_time = time.time()
+        retries = 3
+        delay = 1
+        success = False
+        status_code = 0
+        
+        for attempt in range(retries):
+            try:
+                response = requests.request(api.method, api.url, timeout=5)
+                status_code = response.status_code
+                success = status_code == 200 and "success" in response.text.lower()
 
-        except requests.exceptions.RequestException:
-            latency = 0
-            status_code = 0
-            success = False
+                if success:
+                    break
+            except requests.exceptions.RequestException:
+                pass
+                
+            if attempt < retries - 1:
+                time.sleep(delay)
+        
+        latency = time.time() - start_time
 
+        if latency > api.latency_threshold:
+            send_latency_alert(api.name, api.user.email, latency)
+        
         #save monitoring result (database)
         HealthLog.objects.create(
             api = api,
@@ -55,7 +73,7 @@ def delete_old_logs():
     threshold_date = timezone.now() - timedelta(days= 30)
     old_logs = HealthLog.objects.filter(checked_at__lt = threshold_date)
     deleted_count , _ = old_logs.delete()
-    print(f"Deleted {deleted_count} old logs.")
+    logger.info(f"Deleted {deleted_count} old logs.")
 
 
 def send_alert_email(api_name, user_email):
@@ -81,4 +99,18 @@ def send_recovery_email(api_name, user_email):
         settings.EMAIL_HOST_USER,
         [user_email],
         fail_silently=False,
+    )
+    
+
+
+def send_latency_alert(api_name, user_email, latency):
+    subject = f"API SLOW : {api_name}"
+    message = f"API '{api_name}' is slow. Response time: {latency:.2f}s"
+
+    send_mail(
+        subject,
+        message,
+        settings.EMAIL_HOST_USER,
+        [user_email],
+        fail_silently= False,
     )
