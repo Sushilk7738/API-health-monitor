@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import ApiCard from './components/ApiCard';
+import Navbar from './components/Navbar';
+
 
 const App = () => {
   const [apis, setApis] = useState([]);
+  const token = localStorage.getItem("token")
 
   useEffect(()=>{
     fetch("http://127.0.0.1:8000/api/apis/", {
       headers: {
-        Authorization : "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzczODk2MzI0LCJpYXQiOjE3NzM4OTI3MjQsImp0aSI6ImZhODVmODNkNDBmNjRkOTVhNzI0NDMxM2FjNWQ2OGVjIiwidXNlcl9pZCI6IjEifQ.fiMPlRcbWXf1jPzK7M8NW2S6zsIxcZAhWbvqoUWVRGc"
+        Authorization : `Bearer ${token}`
       },
     })
     .then((res) =>res.json())
@@ -21,14 +24,11 @@ const App = () => {
   return (
     <div className='min-h-screen bg-gray-900 text-gray-100 p-6'>
       {/* title */}
-
-      <h1 className='text-2xl text-center font-bold mb-6'>
-        API Monitoring Dashboard
-      </h1>
+      <Navbar/>
 
       {/* cards container */}
 
-      <div className='flex flex-wrap gap-6'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
         {apis.map((api)=>(
           <ApiCard
             key={api.id}
