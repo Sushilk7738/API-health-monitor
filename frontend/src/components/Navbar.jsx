@@ -12,7 +12,13 @@ function Navbar() {
                 <span className="text-xs sm:text-sm text-gray-400">
                     Welcome, User👋
                 </span>
-                <button className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 rounded-lg transition">
+                <button 
+                    onClick={()=>{
+                        localStorage.removeItem("token");
+                        window.location.href = "/login";
+                    }}
+                    className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 rounded-lg transition"
+                >
                     Logout
                 </button>
             </div>

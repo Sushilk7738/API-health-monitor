@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Apicard = ({ name, status, responseTime, lastChecked}) => {
+const ApiCard = ({ name, status, responseTime, lastChecked}) => {
     return (
         <div className='bg-gray-800 p-5 rounded-2xl shadow-lg w-80 transition transform hover:scale-105 hover:shadow-xl'>
             <div className='flex justify-between items-center'>
@@ -26,4 +26,4 @@ const Apicard = ({ name, status, responseTime, lastChecked}) => {
     )
 }
 
-export default Apicard;
+export default ApiCard;
