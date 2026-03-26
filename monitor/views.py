@@ -11,23 +11,15 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from datetime import timedelta
 from rest_framework.permissions import IsAuthenticated
-
+from .services import perform_check
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def health_check(request, api_id):
-    api = get_object_or_404(APIEndpoint, id = api_id, user =request.user)
-    start = time.time()
-    try:
-        response = requests.request(api.method, api.url, timeout=5)
-        status = response.status_code
-        success = status ==200
+    api = get_object_or_404(APIEndpoint, id = api_id)
     
-    except:
-        status = 0
-        success = False
-    response_time = time.time() - start
+    status, success, response_time = perform_check(api)
     
     log = HealthLog.objects.create(
         api = api,
@@ -64,7 +56,7 @@ class HealthLogListView(generics.ListAPIView):
             queryset = queryset.filter(status_code = status)
             
         return queryset
-    
+        return HealthLog.objects.all().order_by('-checked_at')
 
 
 @api_view(['GET'])
@@ -105,8 +97,11 @@ def api_stats(request, api_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def api_status(request):
-    apis = APIEndpoint.objects.filter(user = request.user)
-
+    if request.user.is_authenticated:
+        apis = APIEndpoint.objects.filter(user = request.user)
+    else:
+        apis = APIEndpoint.objects.all()
+    
     data = []
 
     for api in apis:
@@ -118,9 +113,11 @@ def api_status(request):
             status = "UNKNOWN"
 
         data.append({
-            "api_name": api.name,
+            "id" : api.id,
+            "name": api.name,
             "url" : api.url,
             "status" : status,
+            "response_time": last_log.response_time if last_log else None,
             "last_checked" : last_log.checked_at if last_log else None
         })
 

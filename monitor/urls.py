@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     #* to see all registered apis health
-    path('check/<int:api_id>', views.health_check , name='health_check'),
+    path('check/<int:api_id>/', views.health_check , name='health_check'),
 
     #* to see successfull apis logs
     path('logs/', views.HealthLogListView.as_view(), name='logs'),
