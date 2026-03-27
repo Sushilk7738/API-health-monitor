@@ -8,7 +8,7 @@ import time
 import logging
 
 logger = logging.getLogger(__name__)
-
+cooldown = timedelta(minutes=30)
 
 import requests
 import time
@@ -52,38 +52,14 @@ def check_all_apis():
     for api in apis:
         logger.info(f"Checking API: {api.name}")
 
-        start_time = time.time()
-        retries = 3
-        delay = 1
-        success = False
-        status_code = 0
+        status_code, success, latency = perform_check(api)
 
-        # retry logic
-        for attempt in range(retries):
-            try:
-                response = requests.request(api.method, api.url, timeout=5)
-                status_code = response.status_code
-                # success = status_code == 200 and "success" in response.text.lower()
-                success = status_code == 200
-
-                if success:
-                    break
-            except requests.exceptions.RequestException:
-                pass
-
-            if attempt < retries - 1:
-                time.sleep(delay)
-
-        latency = time.time() - start_time
-
-        # ⚠️ Latency alert (safe)
+        # latency alert
         if latency > api.latency_threshold:
-            try:
-                send_latency_alert(api.name, api.user.email, latency)
-            except Exception as e:
-                logger.error(f"Latency email failed: {e}")
-
-        # Save log 
+            logger.warning(f"{api.name} is slow: {latency}")
+        
+        
+        # save log
         HealthLog.objects.create(
             api=api,
             status_code=status_code,
@@ -91,27 +67,30 @@ def check_all_apis():
             success=success
         )
 
-        #Failure detection 
+        # failure detection
         recent_logs = HealthLog.objects.filter(api=api).order_by("-checked_at")[:3]
 
         if len(recent_logs) == 3 and all(not log.success for log in recent_logs):
-            if not api.alert_sent:
+
+            if not api.last_alert_sent or timezone.now() - api.last_alert_sent > cooldown:
                 try:
                     send_alert_email(api.name, api.user.email)
                 except Exception as e:
                     logger.error(f"Alert email failed: {e}")
-                api.alert_sent = True
+
+                api.last_alert_sent = timezone.now()   
+                api.alert_sent = True                  
                 api.save()
 
-        #  Recovery detection
+        # recovery
         if success and api.alert_sent:
             try:
                 send_recovery_email(api.name, api.user.email)
             except Exception as e:
                 logger.error(f"Recovery email failed: {e}")
+
             api.alert_sent = False
             api.save()
-
 
 def delete_old_logs():
     threshold_date = timezone.now() - timedelta(days=30)

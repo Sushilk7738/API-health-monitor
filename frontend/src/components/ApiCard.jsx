@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 
 
-const ApiCard = ({ name, apiStatus, responseTime, lastChecked, isChecking }) => {
+const ApiCard = ({ id, name, apiStatus, responseTime, lastChecked, isChecking }) => {
     const navigate = useNavigate();
 
     let displayStatus = apiStatus;
@@ -17,7 +17,7 @@ const ApiCard = ({ name, apiStatus, responseTime, lastChecked, isChecking }) => 
 return (
     <div 
         className="bg-gray-800 p-5 rounded-xl hover:bg-gray-700 hover:scale-105 transition-all duration-200 cursor-pointer"
-        onClick={()=>navigate(`/api/${name}`)}
+        onClick={()=>navigate(`/api/${id}`)}
     >
     
     <div className="flex justify-between items-center mb-3">

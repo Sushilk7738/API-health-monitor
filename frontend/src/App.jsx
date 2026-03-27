@@ -3,6 +3,7 @@ import Navbar from './components/Navbar'
 import { Routes, Route, useLocation } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Login from './pages/Login';
+import ApiDetail from "./pages/ApiDetail";
 
 const App = () => {
   const location = useLocation()
@@ -14,6 +15,7 @@ const App = () => {
       <Routes>
         <Route path='/' element={<Dashboard />} />
         <Route path='/login' element={<Login />} />
+        <Route path='/api/:id' element={<ApiDetail/>}/>
       </Routes>      
     </div>
   )
