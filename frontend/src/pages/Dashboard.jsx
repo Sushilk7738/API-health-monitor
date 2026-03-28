@@ -22,6 +22,7 @@ const Dashboard = ()=>{
     
     useEffect(() => {
         const token = localStorage.getItem("token");
+        
 
         if (!token) {
             navigate("/login");
@@ -154,7 +155,7 @@ const Dashboard = ()=>{
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ">
                 {apis.map((api) =>(
                     <ApiCard
-                        id={api.id}
+                        key={api.id}
                         name={api.name}
                         status={api.status}
                         responseTime={

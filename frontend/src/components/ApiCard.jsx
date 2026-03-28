@@ -23,7 +23,7 @@ return (
     <div className="flex justify-between items-center mb-3">
         <h3 className="text-white font-semibold text-lg">{name}</h3>
         <span
-        className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
+        className={`text-xs px-2 py-2 rounded-full flex items-center gap-1 ${
             displayStatus?.toUpperCase() === "UP" 
             ? "bg-green-500/20 text-green-400"
             : displayStatus?.toUpperCase() === "DOWN" 
