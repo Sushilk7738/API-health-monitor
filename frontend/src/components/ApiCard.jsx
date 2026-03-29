@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
+import { BASE_URL } from "../api/config";
 
 
-
-const ApiCard = ({ id, name, apiStatus, responseTime, lastChecked, isChecking }) => {
+const ApiCard = ({ id, name, apiStatus, responseTime, lastChecked, isChecking, onDelete }) => {
     const navigate = useNavigate();
 
     let displayStatus = apiStatus;
@@ -14,11 +15,44 @@ const ApiCard = ({ id, name, apiStatus, responseTime, lastChecked, isChecking })
     }
     
     
+    const handleDelete = async (e)=>{
+        e.stopPropagation();
+        
+        try{
+            const res = await fetch(`${BASE_URL}/apis/${id}`, 
+            {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+            
+            if (res.ok){
+                toast.success("API Deleted successfully ✅");
+                onDelete(id);
+            }
+            else{
+                toast.error("Failed to delete API🥲");
+            }
+        }
+        catch(err){
+            console.log(err);
+            toast.error("Something went wrong ❌");
+        }
+    }
+    
+    console.log("ApiCard id:", id);
+    
 return (
+
+    
     <div 
         className="bg-gray-800 p-5 rounded-xl hover:bg-gray-700 hover:scale-105 transition-all duration-200 cursor-pointer"
         onClick={()=>navigate(`/api/${id}`)}
     >
+    
+    
+        
     
     <div className="flex justify-between items-center mb-3">
         <h3 className="text-white font-semibold text-lg">{name}</h3>
@@ -42,6 +76,8 @@ return (
             ></span>
             {displayStatus}
         </span>
+
+        
     </div>
 
     {/* Bottom */}
@@ -64,6 +100,14 @@ return (
         )}
 
     </div>
+
+    <button
+        className="bg-red-600 px-3 py-1 rounded mt-3 text-sm"
+        onClick={handleDelete}
+    >
+        Delete
+    </button>
+
     </div>
 );
 };

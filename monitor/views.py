@@ -12,7 +12,9 @@ from django.shortcuts import get_object_or_404
 from datetime import timedelta
 from rest_framework.permissions import IsAuthenticated
 from .services import perform_check
-
+from rest_framework import generics
+from django.contrib.auth.models import User
+from .serializers import RegisterSerializer
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -156,3 +158,8 @@ class APIEndpointDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return APIEndpoint.objects.filter(user = self.request.user)
+
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer

@@ -156,6 +156,7 @@ const Dashboard = ()=>{
                 {apis.map((api) =>(
                     <ApiCard
                         key={api.id}
+                        id={api.id}
                         name={api.name}
                         status={api.status}
                         responseTime={
@@ -167,6 +168,10 @@ const Dashboard = ()=>{
                                 : "--"
                         }
                         isChecking = {checkingIds.includes(api.id)}
+
+                        onDelete={(id)=>{
+                            setApis((prev)=> prev.filter((a)=> a.id !== id));
+                        }}
                     />
                 ))}
             </div>

@@ -1,7 +1,19 @@
+import { useNavigate } from "react-router-dom";
+
+
+
+
 function Navbar() {
+    const navigate = useNavigate();
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const username = userInfo?.name;
+
     return(
         <div className="flex justify-between items-center mb-6 px-6 py-4 bg-gray-800 rounded">
-            <div className="flex items-center gap-2">
+            <div 
+                className="flex items-center gap-2"
+                onClick={()=> navigate("/")}
+            >
                 <span>⚡</span>
                 <h1 className="text-lg font-semibold sm:text-xl tracking-tight text-white">
                     PulseAPI
@@ -9,8 +21,8 @@ function Navbar() {
             </div>
 
             <div className="flex items-center gap-4">
-                <span className="text-xs sm:text-sm text-gray-400">
-                    Welcome, User👋
+                <span className="text-xs font-bold sm:text-sm text-gray-200">
+                    Welcome, {username || "User"}👋
                 </span>
                 <button 
                     onClick={()=>{

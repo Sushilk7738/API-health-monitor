@@ -23,4 +23,7 @@ urlpatterns = [
 
     #* to fetch single api of user
     path('apis/<int:pk>', views.APIEndpointDetailView.as_view(), name='api_detail'),
+
+    #* to register api  
+    path('register', views.RegisterView.as_view(), name='register'),
 ]   

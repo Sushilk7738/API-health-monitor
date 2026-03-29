@@ -21,6 +21,7 @@ const Login = ()=>{
         .then((res) => res.json())
         .then((data) => {
             localStorage.setItem("token", data.access);
+            localStorage.setItem("username" , data.username);
             window.location.href = "/";
         })
         .catch((err) => console.error(err));
