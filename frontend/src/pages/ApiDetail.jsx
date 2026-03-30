@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BASE_URL } from "../api/config";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import {
 LineChart,
 Line,
@@ -13,6 +14,7 @@ ResponsiveContainer,
 
 const ApiDetail = () => {
 const { id } = useParams();
+const navigate = useNavigate();
 
 const [stats, setStats] = useState({});
 const [logs, setLogs] = useState([]);
@@ -145,6 +147,15 @@ if (loading) {
 
 return (
     <div className="p-6 text-white">
+
+    <div className="flex justify-end mb-4">
+        <button
+            onClick={() => navigate(`/edit-api/${id}/`)}
+            className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm"
+        >
+            Edit API
+        </button>
+    </div>
 
     {/* STATS */}
     <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-6">

@@ -15,7 +15,7 @@ export default function AddAPI(){
         e.preventDefault()
         
         try{
-            const res = await fetch(`${BASE_URL}/apis/create`, {
+            const res = await fetch(`${BASE_URL}/apis/create/`, {
                 method: "POST",
                 headers: {
                     "Content-Type" : "application/json",
@@ -31,8 +31,12 @@ export default function AddAPI(){
             const data = await res.json();
             console.log(data);
 
-            toast.success("API Added Successfully ✅");
-            navigate("/")
+            if (res.ok) {
+                toast.success("API Added Successfully");
+                navigate("/");
+            } else {
+                toast.error("Failed to add API");
+            }
             
             setName("");
             setUrl("");

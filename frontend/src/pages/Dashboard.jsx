@@ -12,6 +12,9 @@ const Dashboard = ()=>{
     const [checkingIds, setCheckingIds] = useState([]);
     const [error, setError] = useState(null);
     const [lastUpdated , setLastUpdated] = useState(null);
+    const [search, setSearch] = useState("")
+    const [statusFilter, setStatusFilter] = useState("ALL");
+
 
     const navigate = useNavigate()
     
@@ -22,7 +25,7 @@ const Dashboard = ()=>{
     
     useEffect(() => {
         const token = localStorage.getItem("token");
-        
+        console.log("REAL APIs:", apis);
 
         if (!token) {
             navigate("/login");
@@ -30,7 +33,7 @@ const Dashboard = ()=>{
         }
 
         const fetchData = () => {
-            fetch(`${BASE_URL}/status`, {
+            fetch(`${BASE_URL}/status/`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -116,67 +119,169 @@ const Dashboard = ()=>{
     
     
     
-    return(
-        <div className="p-4 sm:p-6 lg:p-8 space-y-4">
+    return (
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 text-white">
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap">
-                <h1 className="text-white text-2xl sm:text-3xl font-bold">
-                    API Dashboard
-                </h1>
-                
-                <button
-                    onClick={handleCheckNow}
-                    disabled={loadingCheck}
-                    className="mb-4 bg-blue-500 px-4 py-2 rounded text-white disabled:opacity-50"
-                >
-                    {loadingCheck ? "Checking...." : "Check Now"}
-                </button>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate__animated animate__fadeInDown">
 
-            </div>
-            {lastUpdated && (
-                <p className="text-gray-400 text-sm">
-                    Last updated: {lastUpdated.toLocaleTimeString()}
-                </p>
-            )}
-
-            {apis.length === 0 && (
-                <div className="flex flex-col items-center justify-center text-gray-400 py-10">
-                    <p className="text-lg mb-2">No APIs added</p>
-                    <p className="text-sm">Start by adding an API to monitor</p>
-                </div>
-            )}
-            
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                <StatCard title="Total APIs" value={total} color="text-blue-400" icon="🚀" />
-                <StatCard title="APIs UP" value={up} color="text-green-400" icon="🟢" />
-                <StatCard title="APIs DOWN" value={down} color="text-red-400" icon="🔴" />
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ">
-                {apis.map((api) =>(
-                    <ApiCard
-                        key={api.id}
-                        id={api.id}
-                        name={api.name}
-                        status={api.status}
-                        responseTime={
-                            api.response_time ? api.response_time.toFixed(2) + "s" : "--"
-                        }
-                        lastChecked={
-                            api.last_checked
-                                ? new Date(api.last_checked).toLocaleString()
-                                : "--"
-                        }
-                        isChecking = {checkingIds.includes(api.id)}
-
-                        onDelete={(id)=>{
-                            setApis((prev)=> prev.filter((a)=> a.id !== id));
-                        }}
-                    />
-                ))}
-            </div>
+        <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">
+            API Dashboard
+            </h1>
+            <p className="text-gray-400 text-sm">
+            Monitor API performance and uptime
+            </p>
         </div>
-    )
+
+        <div className="flex gap-2">
+            <button
+            onClick={handleCheckNow}
+            disabled={loadingCheck}
+            className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white transition duration-200 hover:scale-105"
+            >
+            {loadingCheck ? "Checking..." : "Check Now"}
+            </button>
+
+            <button
+            onClick={() => navigate("/add-api")}
+            className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white transition duration-200 hover:scale-105"
+            >
+            Add API
+            </button>
+        </div>
+        </div>
+        
+
+        {/* Insights Panel */}
+        <div className="grid sm:grid-cols-3 gap-4 animate__animated animate__fadeInUp">
+
+        <div className="bg-gray-800 p-4 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 transition">
+            <p className="text-gray-400 text-sm">System Health</p>
+            <h2 className={`text-lg font-semibold mt-1 ${down > 0 ? "text-red-400" : "text-green-400"}`}>
+            {down > 0 ? "Issues detected" : "All systems operational"}
+            </h2>
+        </div>
+
+        <div className="bg-gray-800 p-4 rounded-xl hover:shadow-lg hover:shadow-yellow-500/20 transition">
+            <p className="text-gray-400 text-sm">Last Updated</p>
+            <h2 className="text-lg font-semibold mt-1">
+            {lastUpdated ? lastUpdated.toLocaleTimeString() : "--"}
+            </h2>
+        </div>
+
+        <div className="bg-gray-800 p-4 rounded-xl hover:shadow-lg hover:shadow-purple-500/20 transition">
+            <p className="text-gray-400 text-sm">Failure Rate</p>
+            <h2 className="text-lg font-semibold mt-1">
+            {total > 0 ? ((down / total) * 100).toFixed(1) : 0}%
+            </h2>
+        </div>
+
+        </div>
+
+
+        <div className="flex flex-col sm:flex-row gap-3">
+            <input 
+                type="text" 
+                placeholder="Search APIs..."
+                value={search}
+                onChange={(e)=>setSearch(e.target.value)}
+                className="bg-gray-800 p-2 rounded w-full sm:w-1/3 text-white"
+            />
+
+            <select 
+                value={statusFilter}
+                onChange={(e)=> setStatusFilter(e.target.value)}
+                className="bg-gray-800 p-2 rounded text-white"
+            >
+                <option value="ALL">All</option>
+                <option value="UP">UP</option>
+                <option value="DOWN">DOWN</option>
+            </select>
+        </div>
+
+
+        
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+
+        <div className="bg-gray-800 p-5 rounded-xl hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 cursor-pointer animate__animated animate__zoomIn">
+            <p className="text-gray-400 text-sm">Total APIs</p>
+            <h2 className="text-2xl font-bold text-blue-400 mt-1">
+            {total}
+            </h2>
+        </div>
+
+        <div className="bg-gray-800 p-5 rounded-xl hover:scale-105 hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300 cursor-pointer animate__animated animate__zoomIn">
+            <p className="text-gray-400 text-sm">APIs UP</p>
+            <h2 className="text-2xl font-bold text-green-400 mt-1">
+            {up}
+            </h2>
+        </div>
+
+        <div className="bg-gray-800 p-5 rounded-xl hover:scale-105 hover:shadow-lg hover:shadow-red-500/20 transition-all duration-300 cursor-pointer animate__animated animate__zoomIn">
+            <p className="text-gray-400 text-sm">APIs DOWN</p>
+            <h2 className="text-2xl font-bold text-red-400 mt-1">
+            {down}
+            </h2>
+        </div>
+
+        </div>
+
+        {/* Empty State */}
+        {apis.length === 0 && (
+        <div className="flex flex-col items-center justify-center text-gray-400 py-16 bg-gray-800 rounded-xl animate__animated animate__fadeIn">
+            <p className="text-lg font-semibold mb-1">
+            No APIs available
+            </p>
+            <p className="text-sm mb-4 text-gray-500">
+            Add your first API to start monitoring
+            </p>
+
+            <button
+            onClick={() => navigate("/add-api")}
+            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm transition hover:scale-105"
+            >
+            Add API
+            </button>
+        </div>
+        )}
+
+        {/* API Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {apis
+        .filter((api) =>
+            api.name.toLowerCase().includes(search.toLowerCase())
+        )
+        .filter((api) =>
+            statusFilter === "ALL" ? true : api.status === statusFilter
+        )
+        .map((api) =>  (
+            <div className="animate__animated animate__fadeInUp" key={api.id}>
+            <ApiCard
+                id={api.id}
+                name={api.name}
+                status={api.status}
+                responseTime={
+                api.response_time ? api.response_time.toFixed(2) + "s" : "--"
+                }
+                lastChecked={
+                api.last_checked
+                    ? new Date(api.last_checked).toLocaleString()
+                    : "--"
+                }
+                isChecking={checkingIds.includes(api.id)}
+                onDelete={(id) => {
+                setApis((prev) => prev.filter((a) => a.id !== id));
+                }}
+            />
+            </div>
+        ))}
+        </div>
+
+    </div>
+);
 }
 
 export default Dashboard;
