@@ -3,10 +3,10 @@ import { toast } from 'react-toastify';
 import { BASE_URL } from "../api/config";
 
 
-const ApiCard = ({ id, name, apiStatus, responseTime, lastChecked, isChecking, onDelete }) => {
+const ApiCard = ({ id, name, Status, responseTime, lastChecked, isChecking, onDelete, keep_alive, onToggle }) => {
     const navigate = useNavigate();
 
-    let displayStatus = apiStatus;
+    let displayStatus = Status;
 
     const time = parseFloat(responseTime) || 0;
 
@@ -19,7 +19,7 @@ const ApiCard = ({ id, name, apiStatus, responseTime, lastChecked, isChecking, o
         e.stopPropagation();
         
         try{
-            const res = await fetch(`${BASE_URL}/apis/${id}`, 
+            const res = await fetch(`${BASE_URL}/apis/${id}/`, 
             {
                 method: "DELETE",
                 headers: {
@@ -41,7 +41,34 @@ const ApiCard = ({ id, name, apiStatus, responseTime, lastChecked, isChecking, o
         }
     }
     
-    console.log("ApiCard id:", id);
+    const handleToggle = async (e)=>{
+        console.log("Toggle clicked", id);
+        e.stopPropagation();
+        try{
+            const res = await fetch(`${BASE_URL}/apis/${id}/toggle-keep-alive/`, {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            const data = await res.json();
+            
+            if (res.ok) {
+                toast.success(`Keep Alive ${data.keep_alive ? "ON" : "OFF"} 🔥`);
+
+                onToggle(id, data.keep_alive)
+            }
+            
+            else {
+                toast.error("Toggle failed ❌");
+            }
+        }
+        catch (err){
+            console.log(err);
+            toast.error("Error occured ❌")
+        }
+    };
     
 return (
 
@@ -49,10 +76,7 @@ return (
     <div 
         className="bg-gray-800 p-5 rounded-xl hover:bg-gray-700 hover:scale-105 transition-all duration-200 cursor-pointer"
         onClick={()=>navigate(`/api/${id}`)}
-    >
-    
-    
-        
+    >    
     
     <div className="flex justify-between items-center mb-3">
         <h3 className="text-white font-semibold text-lg">{name}</h3>
@@ -101,13 +125,25 @@ return (
 
     </div>
 
-    <button
-        className="bg-red-600 px-3 py-1 rounded mt-3 text-sm"
-        onClick={handleDelete}
-    >
-        Delete
-    </button>
+        <div className="flex gap-2 mt-3">
+            <button
+                className="bg-red-600 px-3 py-1 rounded text-sm"
+                onClick={handleDelete}
+            >
+                Delete
+            </button>
 
+            <button
+                onClick={handleToggle}
+                className={`px-3 py-1 rounded text-sm font-semibold ${
+                    keep_alive
+                        ? "bg-green-600 text-white"
+                        : "bg-gray-600 text-white"
+                }`}
+            >
+                {keep_alive ? "Active" : "Paused"}
+            </button>
+        </div>
     </div>
 );
 };

@@ -3,6 +3,7 @@ import { BASE_URL } from "../api/config";
 import ApiCard from "../components/ApiCard";
 import StatCard from '../components/StatCard'
 import {useNavigate} from "react-router-dom";
+import { toast } from "react-toastify";
 
 
 const Dashboard = ()=>{
@@ -116,7 +117,15 @@ const Dashboard = ()=>{
             setCheckingIds([]);
         }
     }
+
     
+    const handleToggle = (id, newValue) => {
+        setApis((prev) =>
+            prev.map((api) =>
+                api.id === id ? { ...api, keep_alive: newValue } : api
+            )
+        );
+    };
     
     
     return (
@@ -263,6 +272,8 @@ const Dashboard = ()=>{
                 id={api.id}
                 name={api.name}
                 status={api.status}
+                keep_alive={api.keep_alive}
+                onToggle = {handleToggle}
                 responseTime={
                 api.response_time ? api.response_time.toFixed(2) + "s" : "--"
                 }

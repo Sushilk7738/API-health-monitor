@@ -163,3 +163,16 @@ class APIEndpointDetailView(generics.RetrieveUpdateDestroyAPIView):
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
+    
+    
+@api_view(['PATCH'])   
+@permission_classes([IsAuthenticated])
+def toggle_keep_alive(request, api_id):
+    api = get_object_or_404(APIEndpoint, id = api_id, user = request.user)
+
+    api.keep_alive = not api.keep_alive
+    api.save()
+    return Response({
+        "id": api.id,
+        "keep_alive": api.keep_alive,
+    })

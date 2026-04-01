@@ -26,4 +26,8 @@ urlpatterns = [
 
     #* to register api  
     path('register/', views.RegisterView.as_view(), name='register'),
+    
+    
+    #* toggle api keep alive
+    path('apis/<int:api_id>/toggle-keep-alive/', views.toggle_keep_alive, name='keep_alive'),
 ]   

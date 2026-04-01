@@ -47,9 +47,13 @@ def perform_check(api):
 
 
 def check_all_apis():
-    apis = APIEndpoint.objects.filter(is_active=True)
+    apis = APIEndpoint.objects.filter(is_active=True, keep_alive = True)
 
     for api in apis:
+        
+        if not api.is_active:
+            continue
+        
         logger.info(f"Checking API: {api.name}")
 
         status_code, success, latency = perform_check(api)
@@ -57,7 +61,10 @@ def check_all_apis():
         # latency alert
         if latency > api.latency_threshold:
             logger.warning(f"{api.name} is slow: {latency}")
-        
+            try:
+                send_latency_alert(api.name, api.user.email, latency)
+            except Exception as e:
+                logger.error(f"Latency email failed: {e}")
         
         # save log
         HealthLog.objects.create(
@@ -72,7 +79,9 @@ def check_all_apis():
 
         if len(recent_logs) == 3 and all(not log.success for log in recent_logs):
 
-            if not api.last_alert_sent or timezone.now() - api.last_alert_sent > cooldown:
+            if not api.alert_sent and (
+                        not api.last_alert_sent or timezone.now() - api.last_alert_sent > cooldown
+                    ):
                 try:
                     send_alert_email(api.name, api.user.email)
                 except Exception as e:
