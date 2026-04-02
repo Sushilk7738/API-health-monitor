@@ -20,7 +20,7 @@ const EditAPI = ()=>{
         const token = localStorage.getItem("token");
         console.log(localStorage.getItem("token"));
 
-        fetch(`${BASE_URL}/apis/${id}/`, {
+        fetch(`${BASE_URL}/api/apis/${id}/`, {
             headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,

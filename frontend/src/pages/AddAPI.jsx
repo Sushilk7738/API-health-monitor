@@ -15,7 +15,7 @@ export default function AddAPI(){
         e.preventDefault()
         
         try{
-            const res = await fetch(`${BASE_URL}/apis/create/`, {
+            const res = await fetch(`${BASE_URL}/api/apis/create/`, {
                 method: "POST",
                 headers: {
                     "Content-Type" : "application/json",

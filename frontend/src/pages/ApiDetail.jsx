@@ -35,7 +35,7 @@ const fetchData = async () => {
 
     // Stats
     const statsRes = await fetch(
-        `${BASE_URL}/stats/${id}?${query}`,
+        `${BASE_URL}/api/stats/${id}?${query}`,
         {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -48,7 +48,7 @@ const fetchData = async () => {
 
     // Logs
     const logsRes = await fetch(
-        `${BASE_URL}/logs/?api=${id}&${query}`,
+        `${BASE_URL}/api/logs/?api=${id}&${query}`,
         {
         headers: {
             Authorization: `Bearer ${token}`,
