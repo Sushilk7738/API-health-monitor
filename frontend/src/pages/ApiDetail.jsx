@@ -21,10 +21,10 @@ const [logs, setLogs] = useState([]);
 const [loading, setLoading] = useState(true);
 const [range, setRange] = useState("1h");
 
-const token = localStorage.getItem("token");
 
 // 🔹 FETCH DATA
 const fetchData = async () => {
+    const token = localStorage.getItem("token");
     try {
     setLoading(true);
 
@@ -37,9 +37,9 @@ const fetchData = async () => {
     const statsRes = await fetch(
         `${BASE_URL}/api/stats/${id}?${query}`,
         {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
         }
     );
 
