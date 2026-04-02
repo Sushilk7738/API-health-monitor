@@ -31,7 +31,7 @@ const Dashboard = ()=>{
         const fetchData = () => {
             const token = localStorage.getItem("token")
             if (!token) {
-                navigate("/login");
+                window.location.href = "/login";
                 return;
             }
 

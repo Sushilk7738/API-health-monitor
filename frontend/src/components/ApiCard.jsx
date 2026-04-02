@@ -19,7 +19,7 @@ const ApiCard = ({ id, name, Status, responseTime, lastChecked, isChecking, onDe
         e.stopPropagation();
         
         try{
-            const res = await fetch(`${BASE_URL}/apis/${id}/`, 
+            const res = await fetch(`${BASE_URL}/api/apis/${id}/`, 
             {
                 method: "DELETE",
                 headers: {
