@@ -34,7 +34,7 @@ const Dashboard = ()=>{
         }
 
         const fetchData = () => {
-            fetch(`${BASE_URL}/status/`, {
+            fetch(`${BASE_URL}/api/status/`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -92,7 +92,7 @@ const Dashboard = ()=>{
         try{
             await Promise.all(
                 apis.map((api) =>
-                    fetch(`${BASE_URL}/check/${api.id}/`, {
+                    fetch(`${BASE_URL}/api/check/${api.id}/`, {
                         headers: {
                             Authorization :`Bearer ${token}`
                         },
@@ -100,7 +100,7 @@ const Dashboard = ()=>{
             )
             );
 
-            const res =await fetch(`${BASE_URL}/status`, {
+            const res =await fetch(`${BASE_URL}/api/status/`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
