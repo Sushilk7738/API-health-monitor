@@ -45,9 +45,10 @@ const ApiCard = ({ id, name, Status, responseTime, lastChecked, isChecking, onDe
         console.log("Toggle clicked", id);
         e.stopPropagation();
         try{
-            const res = await fetch(`${BASE_URL}/apis/${id}/toggle-keep-alive/`, {
+            const res = await fetch(`${BASE_URL}/api/apis/${id}/toggle-keep-alive/`, {
                 method: "PATCH",
                 headers: {
+                    "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
