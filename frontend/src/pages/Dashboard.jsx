@@ -25,15 +25,16 @@ const Dashboard = ()=>{
 
     
     useEffect(() => {
-        const token = localStorage.getItem("token");
         console.log("REAL APIs:", apis);
 
-        if (!token) {
-            navigate("/login");
-            return;
-        }
-
+        
         const fetchData = () => {
+            const token = localStorage.getItem("token")
+            if (!token) {
+                navigate("/login");
+                return;
+            }
+
             fetch(`${BASE_URL}/api/status/`, {
                 headers: {
                     Authorization: `Bearer ${token}`,

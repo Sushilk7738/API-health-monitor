@@ -29,7 +29,7 @@ function Navbar() {
                     onClick={()=>{
                         localStorage.removeItem("token");
                         localStorage.removeItem("userInfo");
-                        navigate("/login");
+                        window.location.href = "/login"; 
                     }}
                     className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 rounded-lg transition"
                 >
