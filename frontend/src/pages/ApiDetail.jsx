@@ -35,7 +35,7 @@ const fetchData = async () => {
 
     // Stats
     const statsRes = await fetch(
-        `${BASE_URL}/api/stats/${id}?${query}`,
+        `${BASE_URL}/api/stats/${id}/?${query}`,
         {
             headers: {
                 Authorization: `Bearer ${token}`,
