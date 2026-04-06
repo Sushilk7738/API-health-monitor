@@ -11,7 +11,6 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from datetime import timedelta
 from rest_framework.permissions import IsAuthenticated
-from .services import perform_check
 from rest_framework import generics
 from django.contrib.auth.models import User
 from .serializers import RegisterSerializer
@@ -19,10 +18,11 @@ from .serializers import RegisterSerializer
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def health_check(request, api_id):
+    from .services import perform_check
+
     api = get_object_or_404(APIEndpoint, id = api_id)
     
-    status, success, response_time = perform_check(api)
-    
+    status, success, response_time = perform_check(api) 
     log = HealthLog.objects.create(
         api = api,
         status_code = status,

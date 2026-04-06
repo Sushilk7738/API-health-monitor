@@ -67,12 +67,13 @@ def check_all_apis():
                 logger.error(f"Latency email failed: {e}")
         
         # save log
-        HealthLog.objects.create(
-            api=api,
-            status_code=status_code,
-            response_time=latency,
-            success=success
-        )
+        if (not success) or (latency > api.latency_threshold):
+            HealthLog.objects.create(
+                api=api,
+                status_code=status_code,
+                response_time=latency,
+                success=success
+            )
 
         # failure detection
         recent_logs = HealthLog.objects.filter(api=api).order_by("-checked_at")[:3]

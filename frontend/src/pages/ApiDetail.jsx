@@ -33,30 +33,24 @@ const fetchData = async () => {
     if (range === "24h") query = "hours=24";
     if (range === "7d") query = "days=7";
 
-    // Stats
-    const statsRes = await fetch(
-        `${BASE_URL}/api/stats/${id}/?${query}`,
-        {
+    // ✅ PARALLEL CALL (FIX)
+    const [statsRes, logsRes] = await Promise.all([
+        fetch(`${BASE_URL}/api/stats/${id}/?${query}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
-        }
-    );
+        }),
+        fetch(`${BASE_URL}/api/logs/?api=${id}&${query}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+    ]);
 
     const statsData = await statsRes.json();
-    setStats(statsData);
-
-    // Logs
-    const logsRes = await fetch(
-        `${BASE_URL}/api/logs/?api=${id}&${query}`,
-        {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-        }
-    );
-
     const logsData = await logsRes.json();
+
+    setStats(statsData);
     setLogs(logsData);
 
     } catch (err) {
@@ -186,9 +180,8 @@ return (
         </h2>
     </div>
 
-    
-    
     </div>
+
     {/* FILTER */}
     <div className="flex justify-end mb-4">
         <select

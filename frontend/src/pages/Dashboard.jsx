@@ -25,16 +25,14 @@ const Dashboard = ()=>{
 
     
     useEffect(() => {
-        console.log("REAL APIs:", apis);
+        const token = localStorage.getItem("token");
 
-        
+        if (!token) {
+            window.location.href = "/login";
+            return;
+        }
+
         const fetchData = () => {
-            const token = localStorage.getItem("token")
-            if (!token) {
-                window.location.href = "/login";
-                return;
-            }
-
             fetch(`${BASE_URL}/api/status/`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -61,28 +59,26 @@ const Dashboard = ()=>{
             });
         };
 
-        fetchData(); // first load
+        const timeout = setTimeout(fetchData, 1500);
 
-        const interval = setInterval(fetchData, 10000); // every 10 sec
-
-        return () => clearInterval(interval); // cleanup
+        return () => clearTimeout(timeout);
     }, []);
-    
-    if (loading) {
-        return(
-            <div className="flex justify-center items-center h-40 text-gray-400">
-                Loading APIs...
-            </div>
-        )
-    }
+        
+        if (loading) {
+            return(
+                <div className="flex justify-center items-center h-40 text-gray-400">
+                    Loading APIs...
+                </div>
+            )
+        }
 
-    if (error) {
-        return (
-            <div className="flex justify-center items-center h-40 text-red-400">
-                {error}
-            </div>
-        );
-    }
+        if (error) {
+            return (
+                <div className="flex justify-center items-center h-40 text-red-400">
+                    {error}
+                </div>
+            );
+        }
 
 
     const handleCheckNow = async ()=>{
