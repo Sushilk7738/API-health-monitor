@@ -14,6 +14,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from django.contrib.auth.models import User
 from .serializers import RegisterSerializer
+from django.db.models import Count, Q
+    
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -58,8 +60,7 @@ class HealthLogListView(generics.ListAPIView):
             queryset = queryset.filter(status_code = status)
             
         return queryset
-        return HealthLog.objects.all().order_by('-checked_at')
-
+    
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -77,9 +78,14 @@ def api_stats(request, api_id):
         since = timezone.now() - timedelta(days=int(days))
         logs = logs.filter(checked_at__gte = since)
 
-    total_checks = logs.count()
-    success_checks = logs.filter(success = True).count()
-    failures = logs.filter(success = False).count()
+    counts = logs.aggregate(
+        total_checks=Count('id'),
+        success_checks=Count('id', filter=Q(success=True)),
+        failures=Count('id', filter=Q(success=False))
+    )
+    total_checks = counts['total_checks']
+    success_checks = counts['success_checks']
+    failures = counts['failures']
 
     avg_response = logs.aggregate(avg =Avg("response_time"))['avg']
 

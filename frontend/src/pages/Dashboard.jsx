@@ -59,9 +59,7 @@ const Dashboard = ()=>{
             });
         };
 
-        const timeout = setTimeout(fetchData, 1500);
-
-        return () => clearTimeout(timeout);
+        fetchData();
     }, []);
         
         if (loading) {

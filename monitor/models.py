@@ -27,6 +27,11 @@ class HealthLog(models.Model):
     success = models.BooleanField()
     checked_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['api', '-checked_at']),
+            models.Index(fields=['checked_at']),
+        ]
+    
     def __str__(self):
-        return f"{self.api.name} - {self.status_code}"
-        
+        return f"{self.api} - {self.status_code}"

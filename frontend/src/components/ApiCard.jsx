@@ -3,10 +3,10 @@ import { toast } from 'react-toastify';
 import { BASE_URL } from "../api/config";
 
 
-const ApiCard = ({ id, name, Status, responseTime, lastChecked, isChecking, onDelete, keep_alive, onToggle }) => {
+const ApiCard = ({ id, name, status, responseTime, lastChecked, isChecking, onDelete, keep_alive, onToggle }) => {
     const navigate = useNavigate();
 
-    let displayStatus = Status;
+    let displayStatus = status;
 
     const time = parseFloat(responseTime) || 0;
 

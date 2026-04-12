@@ -70,20 +70,20 @@ def check_all_apis():
 
         # failure detection
         recent_logs = HealthLog.objects.filter(api=api).order_by("-checked_at")[:3]
+        needs_save = False
 
         if len(recent_logs) == 3 and all(not log.success for log in recent_logs):
-
             if not api.alert_sent and (
-                        not api.last_alert_sent or timezone.now() - api.last_alert_sent > cooldown
-                    ):
+                not api.last_alert_sent or timezone.now() - api.last_alert_sent > cooldown
+            ):
                 try:
                     send_alert_email(api.name, api.user.email)
                 except Exception as e:
                     logger.error(f"Alert email failed: {e}")
 
-                api.last_alert_sent = timezone.now()   
-                api.alert_sent = True                  
-                api.save()
+                api.last_alert_sent = timezone.now()
+                api.alert_sent = True
+                needs_save = True
 
         # recovery
         if success and api.alert_sent:
@@ -93,8 +93,12 @@ def check_all_apis():
                 logger.error(f"Recovery email failed: {e}")
 
             api.alert_sent = False
-            api.save()
+            needs_save = True
 
+        if needs_save:
+            api.save()
+            
+            
 def delete_old_logs():
     threshold_date = timezone.now() - timedelta(days=30)
     old_logs = HealthLog.objects.filter(checked_at__lt=threshold_date)
