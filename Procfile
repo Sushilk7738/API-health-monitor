@@ -1,3 +1,3 @@
-web: gunicorn config.wsgi:application
+web: bash start.sh
 worker: celery -A config worker --loglevel=info --concurrency=1
 beat: celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
