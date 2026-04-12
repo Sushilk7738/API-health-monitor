@@ -99,15 +99,12 @@ def api_stats(request, api_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def api_status(request):
-    if request.user.is_authenticated:
-        apis = APIEndpoint.objects.filter(user = request.user)
-    else:
-        apis = APIEndpoint.objects.all()
-    
+    apis = APIEndpoint.objects.filter(user=request.user).prefetch_related('logs')
+
     data = []
 
     for api in apis:
-        last_log = HealthLog.objects.filter(api = api).order_by("-checked_at").first()
+        last_log = api.logs.order_by('-checked_at').first()
 
         if last_log:
             status = "UP" if last_log.success else "DOWN"
@@ -115,23 +112,18 @@ def api_status(request):
             status = "UNKNOWN"
 
         data.append({
-            "id" : api.id,
+            "id": api.id,
             "name": api.name,
-            "url" : api.url,
-            "status" : status,
+            "url": api.url,
+            "status": status,
+            "keep_alive": api.keep_alive,
             "response_time": last_log.response_time if last_log else None,
-            "last_checked" : last_log.checked_at if last_log else None
+            "last_checked": last_log.checked_at if last_log else None,
         })
 
     return Response(data)
-
-
-
-
-
-
-
-
+    
+    
 #* API LIST view
 
 class APIEndpointListView(generics.ListAPIView):

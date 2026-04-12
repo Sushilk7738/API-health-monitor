@@ -14,36 +14,29 @@ import requests
 import time
 
 def perform_check(api):
-    start = time.time()
-    retries = 3
-    delay = 1
-
     status_code = 0
     success = False
+    response_time = 0
+    
+    try:
+        start = time.time()
+        response = requests.request(
+            api.method,
+            api.url,
+            timeout=10
+        )
+        
+        response_time = time.time() - start
+        status_code = response.status_code
+        success = 200 <= status_code < 300
 
-    for attempt in range(retries):
-        try:
-            response = requests.request(
-                api.method,
-                api.url,
-                timeout=getattr(api, "timeout", 5)
-            )
-            status_code = response.status_code
-            success = 200 <= status_code < 300
-
-            if success:
-                break
-
-        except requests.exceptions.RequestException:
-            pass
-
-        if attempt < retries - 1:
-            time.sleep(delay)
-
-    response_time = time.time() - start
-
+    except requests.exceptions.RequestException:
+        response_time = time.time() - start
+        
     return status_code, success, response_time
-
+    
+    
+    
 
 
 def check_all_apis():
